@@ -112,8 +112,9 @@ module Craigslist
         Craigslist::PERSISTENT.city && Craigslist::PERSISTENT.category
 
       uri = self.build_uri(Craigslist::PERSISTENT.city, Craigslist::PERSISTENT.category, Craigslist::PERSISTENT.search)
-      search_results = []
+      absolute_url = self.build_uri(Craigslist::PERSISTENT.city, Craigslist::PERSISTENT.category, false)[0..-2] # remove trailing slash
 
+      search_results = []
       for i in 0..(max_results / 100)
         uri = self.more_results(uri, i, Craigslist::PERSISTENT.search) if i > 0
         doc = Nokogiri::HTML(open(uri))
@@ -123,7 +124,13 @@ module Craigslist
 
           title = node.at_css(".pl a")
           search_result['text'] = title.text.strip
-          search_result['href'] = title['href']
+
+          # CL displays nearby cities results at the end.
+          # Local listings use a relative url, nearby cities listings do not.
+          url = URI(title['href'])
+          break unless url.host == nil
+
+          search_result['href'] = absolute_url + url.to_s
 
           info = node.at_css(".l2 .pnr")
 

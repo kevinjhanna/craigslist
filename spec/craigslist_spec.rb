@@ -91,7 +91,14 @@ describe "Craigslist" do
       posts = Craigslist.seattle.for_sale.search(query: "guitar", type: :only_title).last
       posts.should be_a Array
       posts.length.should eq 20
-      posts.each { |post| post["text"].should =~ /guitar/i }
+      posts.each { |post| post["text"].should match /guitar/i }
+    end
+
+    it "should not return results from nearby areas" do
+      posts = Craigslist.seattle.for_sale.search(query: "guitar", type: :only_title).last
+      posts.each do |post|
+        post['href'].should match /http:\/\/seattle\.craigslist\.org/
+      end
     end
   end
 
@@ -124,6 +131,8 @@ describe "Craigslist" do
       posts.each do |post|
         post['text'].should_not be nil
         post['href'].should_not be nil
+
+        post['href'].should match /http:\/\/newyork\.craigslist\.org\/bia\//
       end
     end
   end
