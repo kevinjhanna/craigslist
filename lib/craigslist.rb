@@ -112,7 +112,7 @@ module Craigslist
         Craigslist::PERSISTENT.city && Craigslist::PERSISTENT.category
 
       uri = self.build_uri(Craigslist::PERSISTENT.city, Craigslist::PERSISTENT.category, Craigslist::PERSISTENT.search)
-      absolute_url = self.build_uri(Craigslist::PERSISTENT.city, Craigslist::PERSISTENT.category, false)[0..-2] # remove trailing slash
+      absolute_url = self.build_city_uri(Craigslist::PERSISTENT.city)
 
       search_results = []
       for i in 0..(max_results / 100)
@@ -129,7 +129,6 @@ module Craigslist
           # Local listings use a relative url, nearby cities listings do not.
           url = URI(title['href'])
           break unless url.host == nil
-
           search_result['href'] = absolute_url + url.to_s
 
           info = node.at_css(".l2 .pnr")
